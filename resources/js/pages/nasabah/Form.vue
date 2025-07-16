@@ -64,6 +64,9 @@ const fixedFields: { key: string; label: string }[] = [
     { key: 'riwayat_kredit', label: 'Riwayat Kredit' },
 ];
 
+const radioFields = fixedFields.filter((f) => Object.keys(options).includes(f.key));
+const inputFields = fixedFields.filter((f) => !Object.keys(options).includes(f.key));
+
 const form = useForm(
     props.columns.reduce(
         (acc, col) => {
@@ -121,8 +124,17 @@ function submit() {
     // Tambahkan data teks
     for (const key in form.data()) {
         if (key === 'kelengkapan_berkas') continue;
-        const value = form[key];
-        formData.append(key, value ?? '');
+
+        // Jangan kirim path file ke FormData jika tidak diganti
+        if (Object.keys(files.value).includes(key)) {
+            // Kalau tidak ada file baru diupload, kirim value sebagai text biasa (bukan FormData file)
+            if (!files.value[key]) {
+                formData.append(key, form[key]); // tetap kirim path-nya
+            }
+            continue; // agar tidak double append nanti di bagian File
+        }
+
+        formData.append(key, form[key] ?? '');
     }
 
     // Tambahkan file
@@ -194,18 +206,18 @@ function onFileSelect(event: any, key: string) {
     <ConfirmDialog />
     <Head :title="props.data ? 'Edit Nasabah' : 'Tambah Nasabah'" />
     <AppLayout :breadcrumbs="breadcrumbItems">
-        <div class="mx-auto space-y-6 p-6">
+        <div class="mx-full space-y-6 p-6">
             <HeadingSmall
                 :title="props.data ? 'Edit Nasabah' : 'Tambah Nasabah'"
                 description="Form data nasabah. Kolom setelah 'kelengkapan_berkas' bersifat dinamis."
             />
 
-            <!-- Static Inputs (Non-Radio) -->
+            <!-- Static Input Fields -->
             <div class="grid grid-cols-2 gap-4">
-                <div v-for="{ key, label } in fixedFields" :key="key" class="flex flex-col gap-1">
+                <div v-for="{ key, label } in inputFields" :key="key" class="flex flex-col gap-1">
                     <Label :for="key">{{ label }}</Label>
 
-                    <!-- Dropdown -->
+                    <!-- Select -->
                     <Select
                         v-if="key === 'id_rumah'"
                         v-model="form[key]"
@@ -228,7 +240,7 @@ function onFileSelect(event: any, key: string) {
                         :invalid="!!form.errors[key]"
                     />
 
-                    <!-- Default Input -->
+                    <!-- Input Text -->
                     <InputText
                         v-else
                         v-model="form[key]"
@@ -238,19 +250,20 @@ function onFileSelect(event: any, key: string) {
                         :invalid="!!form.errors[key]"
                     />
 
+                    <!-- Error Message -->
                     <Message v-if="form.errors[key]" severity="error" size="small" variant="simple">
                         {{ form.errors[key] }}
                     </Message>
                 </div>
             </div>
 
-            <!-- Radio Buttons -->
-            <div class="mt-6 grid grid-cols-2 gap-4">
-                <div v-for="{ key, label } in fixedFields" :key="key" class="flex flex-col gap-1">
+            <!-- Radio Button Fields -->
+            <div class="mt-6 grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-2 lg:grid-cols-5">
+                <div v-for="{ key, label } in radioFields" :key="key" class="flex flex-col gap-2">
                     <Label :for="key">{{ label }}</Label>
 
-                    <div class="flex flex-wrap gap-4">
-                        <div v-for="opt in options[key]" :key="opt" class="flex gap-2">
+                    <div class="flex flex-col gap-2">
+                        <div v-for="opt in options[key]" :key="opt" class="flex items-center gap-2">
                             <RadioButton :inputId="key + opt" :value="opt" v-model="form[key]" />
                             <label :for="key + opt">{{ opt }}</label>
                         </div>
@@ -281,7 +294,7 @@ function onFileSelect(event: any, key: string) {
             <!-- Upload Dokumen -->
             <div class="col-span-2 border-t pt-4">
                 <h3 class="mb-3 text-lg font-semibold">Upload Dokumen</h3>
-                <div class="grid grid-cols-4 gap-4">
+                <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
                     <div v-for="doc in ['KTP', 'NPWP', 'surat_nikah', 'spt_tahunan', 'kartu_keluarga']" :key="doc" class="space-y-2">
                         <Label :for="doc" class="capitalize">{{ doc.replace(/_/g, ' ') }}</Label>
                         <FileUpload

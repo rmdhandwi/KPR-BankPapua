@@ -6,8 +6,8 @@ import { Column, DataTable } from 'primevue';
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
-        title: 'Data Rumah',
-        href: '/developer/rumah/',
+        title: 'Perhitungan SAW',
+        href: '/admin/perhitungan',
     },
 ];
 
