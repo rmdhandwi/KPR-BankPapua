@@ -19,6 +19,7 @@ class PerhitunganController extends Controller
         $dataAwal = [];
         $peringatan = [];
 
+        // 1. Bobot Subkriteria
         foreach ($nasabahList as $nasabah) {
             $baris = [
                 'id_nasabah' => $nasabah->id_nasabah,
@@ -26,13 +27,9 @@ class PerhitunganController extends Controller
             ];
 
             foreach ($kriteriaList as $kriteria) {
-                // Konversi nama_kriteria ke nama kolom di nasabah
                 $kolomNasabah = Str::snake(str_replace('jumlah', 'jml', strtolower($kriteria->nama_kriteria)));
-
-                // Ambil nilai dari kolom nasabah tersebut
                 $nilaiNasabah = $nasabah->{$kolomNasabah} ?? null;
 
-                // Cari subkriteria berdasarkan nilai nasabah
                 $sub = SubKriteria::where('id_kriteria', $kriteria->id_kriteria)
                     ->where('nama_subkriteria', $nilaiNasabah)
                     ->first();
@@ -40,7 +37,6 @@ class PerhitunganController extends Controller
                 $bobot = $sub?->bobot ?? 0;
                 $baris[$kriteria->id_kriteria] = $bobot;
 
-                // Peringatan jika nilai tidak dikenali
                 if ($bobot == 0) {
                     $peringatan[] = "Nasabah '{$nasabah->nama_lengkap}' nilai '{$nilaiNasabah}' tidak cocok pada subkriteria '{$kriteria->nama_kriteria}'.";
                 }
@@ -49,7 +45,7 @@ class PerhitunganController extends Controller
             $dataAwal[] = $baris;
         }
 
-        // Hitung max/min untuk normalisasi
+        // 2. Hitung Max / Min
         $maxMin = [];
         foreach ($kriteriaList as $kriteria) {
             $kolom = $kriteria->id_kriteria;
@@ -62,7 +58,7 @@ class PerhitunganController extends Controller
             ];
         }
 
-        // Normalisasi
+        // 3. Normalisasi
         $normalisasi = [];
         foreach ($dataAwal as $baris) {
             $row = [
@@ -75,16 +71,16 @@ class PerhitunganController extends Controller
                 $nilai = $baris[$id];
 
                 if ($maxMin[$id]['jenis'] === 'Benefit') {
-                    $row[$id] = $maxMin[$id]['max'] != 0 ?  round($nilai / $maxMin[$id]['max'], 2) : 0;
+                    $row[$id] = $maxMin[$id]['max'] != 0 ? round($nilai / $maxMin[$id]['max'], 2) : 0;
                 } else {
-                    $row[$id] = $nilai != 0 ?  round($maxMin[$id]['min'] / $nilai, 2)  : 0;
+                    $row[$id] = $nilai != 0 ? round($maxMin[$id]['min'] / $nilai, 2) : 0;
                 }
             }
 
             $normalisasi[] = $row;
         }
 
-        // Hitung nilai akhir
+        // 4. Hitung Nilai Akhir
         $hasilAkhir = [];
         foreach ($normalisasi as $baris) {
             $total = 0;
@@ -93,11 +89,8 @@ class PerhitunganController extends Controller
                 $id = $kriteria->id_kriteria;
                 $bobot = $kriteria->bobot;
                 $nilai = $baris[$id];
-
-                // dd("Normalisasi: $nilai, Bobot: $bobot");
                 $total += $nilai * $bobot / 100;
             }
-
 
             $hasilAkhir[] = [
                 'id_nasabah' => $baris['id_nasabah'],
@@ -106,14 +99,37 @@ class PerhitunganController extends Controller
             ];
         }
 
-        // Urutkan dari tertinggi
-        usort($hasilAkhir, fn($a, $b) => $a['nilai_akhir'] <=> $b['nilai_akhir']);
+        $nilaiAkhirArray = array_column($hasilAkhir, 'nilai_akhir');
 
-        // Tambahkan peringkat
-        foreach ($hasilAkhir as $i => &$item) {
-            $item['peringkat'] = $i + 1;
+        // Cari nilai tertinggi dan terendah
+        $nilaiTertinggi = max($nilaiAkhirArray);
+        $nilaiTerendah = min($nilaiAkhirArray);
+
+        // Hitung nilai tengah (bukan median, tapi midpoint dari rentang)
+        $nilaiTengah = round(($nilaiTertinggi + $nilaiTerendah) / 2, 2);
+
+        // 6. Tambahkan Status Layak / Tidak Layak
+        foreach ($hasilAkhir as &$item) {
+            $item['status'] = $item['nilai_akhir'] >= $nilaiTengah ? 'Layak' : 'Tidak Layak';
         }
+        unset($item);
 
+        // 7. Peringkat (Tangani nilai sama)
+        usort($hasilAkhir, fn($a, $b) => $b['nilai_akhir'] <=> $a['nilai_akhir']);
+
+        $peringkat = 1;
+        $lastNilai = null;
+        foreach ($hasilAkhir as $i => &$item) {
+            if ($lastNilai !== null && $item['nilai_akhir'] === $lastNilai) {
+                $item['peringkat'] = $peringkat; // sama
+            } else {
+                $peringkat = $i + 1;
+                $item['peringkat'] = $peringkat;
+            }
+
+            $lastNilai = $item['nilai_akhir'];
+        }
+        unset($item);
 
         return Inertia::render('admin/Perhitungan/Index', [
             'dataAwal'     => $dataAwal,
@@ -121,6 +137,9 @@ class PerhitunganController extends Controller
             'hasilAkhir'   => $hasilAkhir,
             'kriteria'     => $kriteriaList,
             'peringatan'   => $peringatan,
+            'nilai_max'    => $nilaiTertinggi,
+            'nilai_min'    => $nilaiTerendah,
+            'nilai_tengah' => $nilaiTengah,
         ]);
     }
 }

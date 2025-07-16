@@ -106,7 +106,6 @@ onMounted(() => {
     }
 });
 
-
 function submit() {
     const isEdit = !!props.data;
     const url = isEdit ? route('developer.nasabah.update', props.data?.id_nasabah) : route('developer.nasabah.store');
@@ -121,7 +120,7 @@ function submit() {
     const formData = new FormData();
     // Tambahkan data teks
     for (const key in form.data()) {
-         if (key === 'kelengkapan_berkas') continue;
+        if (key === 'kelengkapan_berkas') continue;
         const value = form[key];
         formData.append(key, value ?? '');
     }
@@ -201,8 +200,8 @@ function onFileSelect(event: any, key: string) {
                 description="Form data nasabah. Kolom setelah 'kelengkapan_berkas' bersifat dinamis."
             />
 
+            <!-- Static Inputs (Non-Radio) -->
             <div class="grid grid-cols-2 gap-4">
-                <!-- Static Inputs -->
                 <div v-for="{ key, label } in fixedFields" :key="key" class="flex flex-col gap-1">
                     <Label :for="key">{{ label }}</Label>
 
@@ -229,19 +228,11 @@ function onFileSelect(event: any, key: string) {
                         :invalid="!!form.errors[key]"
                     />
 
-                    <!-- Radio -->
-                    <div v-else-if="Object.keys(options).includes(key)" class="flex flex-wrap gap-4">
-                        <div v-for="opt in options[key]" :key="opt" class="flex gap-2">
-                            <RadioButton :inputId="key + opt" :value="opt" v-model="form[key]" />
-                            <label :for="key + opt">{{ opt }}</label>
-                        </div>
-                    </div>
-
-                    <!-- Default -->
+                    <!-- Default Input -->
                     <InputText
                         v-else
                         v-model="form[key]"
-                        :maxlength="['no_ktp', 'no_kk'].includes(key) ? 16 : null"
+                        :maxlength="['no_ktp', 'no_kk'].includes(key) ? 16 : undefined"
                         :id="key"
                         class="w-full"
                         :invalid="!!form.errors[key]"
@@ -251,59 +242,80 @@ function onFileSelect(event: any, key: string) {
                         {{ form.errors[key] }}
                     </Message>
                 </div>
+            </div>
 
-                <!-- Dynamic Inputs -->
-                <template v-if="dynamicFields.length">
-                    <div class="col-span-2 border-t pt-4">
-                        <h3 class="mb-3 text-lg font-semibold">Kolom Dinamis</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div v-for="col in dynamicFields" :key="col" class="flex flex-col gap-1">
-                                <Label :for="col" class="capitalize">{{ col.replace(/_/g, ' ') }}</Label>
-                                <InputText :id="col" v-model="form[col]" class="w-full" :invalid="!!form.errors[col]" />
-                                <Message v-if="form.errors[col]" severity="error" size="small" variant="simple">{{ form.errors[col] }}</Message>
-                            </div>
+            <!-- Radio Buttons -->
+            <div class="mt-6 grid grid-cols-2 gap-4">
+                <div v-for="{ key, label } in fixedFields" :key="key" class="flex flex-col gap-1">
+                    <Label :for="key">{{ label }}</Label>
+
+                    <div class="flex flex-wrap gap-4">
+                        <div v-for="opt in options[key]" :key="opt" class="flex gap-2">
+                            <RadioButton :inputId="key + opt" :value="opt" v-model="form[key]" />
+                            <label :for="key + opt">{{ opt }}</label>
                         </div>
                     </div>
-                </template>
 
+                    <Message v-if="form.errors[key]" severity="error" size="small" variant="simple">
+                        {{ form.errors[key] }}
+                    </Message>
+                </div>
+            </div>
+
+            <!-- Dynamic Fields -->
+            <template v-if="dynamicFields.length">
                 <div class="col-span-2 border-t pt-4">
-                    <h3 class="mb-3 text-lg font-semibold">Upload Dokumen</h3>
-                    <div class="grid grid-cols-4 gap-4">
-                        <div v-for="doc in ['KTP', 'NPWP', 'surat_nikah', 'spt_tahunan', 'kartu_keluarga']" :key="doc" class="space-y-2">
-                            <Label :for="doc" class="capitalize">{{ doc.replace(/_/g, ' ') }}</Label>
-                            <FileUpload
-                                mode="basic"
-                                name="file"
-                                :chooseLabel="form[doc] && !files[doc] ? 'Ganti File' : 'Pilih File'"
-                                customUpload
-                                auto
-                                accept=".jpg,.jpeg,.png,.pdf"
-                                class="w-full"
-                                @select="(e) => onFileSelect(e, doc)"
-                            />
+                    <h3 class="mb-3 text-lg font-semibold">Kolom Dinamis</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div v-for="col in dynamicFields" :key="col" class="flex flex-col gap-1">
+                            <Label :for="col" class="capitalize">{{ col.replace(/_/g, ' ') }}</Label>
+                            <InputText :id="col" v-model="form[col]" class="w-full" :invalid="!!form.errors[col]" />
+                            <Message v-if="form.errors[col]" severity="error" size="small" variant="simple">
+                                {{ form.errors[col] }}
+                            </Message>
+                        </div>
+                    </div>
+                </div>
+            </template>
 
-                            <!-- Preview -->
-                            <div v-if="srcs[doc]" class="mt-2">
-                                <img
-                                    v-if="/^data:image/.test(srcs[doc]!) || srcs[doc]?.endsWith('.jpg') || srcs[doc]?.endsWith('.png')"
-                                    :src="srcs[doc]"
-                                    alt="Preview"
-                                    class="h-52 w-full rounded border shadow"
-                                />
-                                <div v-else-if="srcs[doc]?.endsWith('.pdf')" class="flex items-center gap-2 text-gray-600">
-                                    <FilePdf class="h-6 w-6 text-red-500" />
-                                    <span class="text-sm">File PDF tersedia</span>
-                                </div>
+            <!-- Upload Dokumen -->
+            <div class="col-span-2 border-t pt-4">
+                <h3 class="mb-3 text-lg font-semibold">Upload Dokumen</h3>
+                <div class="grid grid-cols-4 gap-4">
+                    <div v-for="doc in ['KTP', 'NPWP', 'surat_nikah', 'spt_tahunan', 'kartu_keluarga']" :key="doc" class="space-y-2">
+                        <Label :for="doc" class="capitalize">{{ doc.replace(/_/g, ' ') }}</Label>
+                        <FileUpload
+                            mode="basic"
+                            name="file"
+                            :chooseLabel="form[doc] && !files[doc] ? 'Ganti File' : 'Pilih File'"
+                            customUpload
+                            auto
+                            accept=".jpg,.jpeg,.png,.pdf"
+                            class="w-full"
+                            @select="(e) => onFileSelect(e, doc)"
+                        />
+
+                        <!-- Preview -->
+                        <div v-if="srcs[doc]" class="mt-2">
+                            <img
+                                v-if="/^data:image/.test(srcs[doc]!) || srcs[doc]?.endsWith('.jpg') || srcs[doc]?.endsWith('.png')"
+                                :src="srcs[doc]"
+                                alt="Preview"
+                                class="h-52 w-full rounded border shadow"
+                            />
+                            <div v-else-if="srcs[doc]?.endsWith('.pdf')" class="flex items-center gap-2 text-gray-600">
+                                <FilePdf class="h-6 w-6 text-red-500" />
+                                <span class="text-sm">File PDF tersedia</span>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Actions -->
-                <div class="col-span-2 mt-4 flex justify-between gap-3">
-                    <Button as="a" label="Kembali" type="button" :href="route('developer.nasabah.index')" severity="secondary" />
-                    <Button :label="props.data ? 'Update' : 'Simpan'" @click="submit" :loading="form.processing" />
-                </div>
+            <!-- Actions -->
+            <div class="col-span-2 mt-4 flex justify-between gap-3">
+                <Button as="a" label="Kembali" type="button" :href="route('developer.nasabah.index')" severity="secondary" />
+                <Button :label="props.data ? 'Update' : 'Simpan'" @click="submit" :loading="form.processing" />
             </div>
         </div>
     </AppLayout>

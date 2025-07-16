@@ -17,9 +17,12 @@ const props = defineProps<{
     hasilAkhir: any[];
     kriteria: { id_kriteria: number; nama_kriteria: string }[];
     peringatan: string[];
+    nilai_max: number;
+    nilai_min: number;
+    nilai_tengah: number;
 }>();
 
-const { dataAwal, normalisasi, hasilAkhir, kriteria, peringatan } = props;
+const { dataAwal, normalisasi, hasilAkhir, kriteria, peringatan, nilai_max, nilai_min, nilai_tengah } = props;
 </script>
 
 <template>
@@ -58,12 +61,22 @@ const { dataAwal, normalisasi, hasilAkhir, kriteria, peringatan } = props;
 
             <!-- Tabel Hasil Akhir -->
             <Card>
-                <template #title>Hasil Akhir dan Peringkat</template>
+                <template #title>
+                    <div class="flex w-full items-center justify-between">
+                        <span>Hasil Akhir dan Peringkat</span>
+                        <Tag :value="'Nilai Kelayakan: ' + nilai_tengah" severity="info" rounded />
+                    </div>
+                </template>
+
                 <template #content>
                     <DataTable :value="hasilAkhir" class="p-datatable-sm" scrollable>
                         <Column field="nama_lengkap" header="Nama Nasabah" />
                         <Column field="nilai_akhir" header="Nilai Akhir" />
-                        <Column field="peringkat" header="Peringkat" />
+                        <Column header="Status">
+                            <template #body="{ data }">
+                                <Tag :value="data.status" :severity="data.status === 'Layak' ? 'success' : 'danger'" />
+                            </template>
+                        </Column>
                     </DataTable>
                 </template>
             </Card>
