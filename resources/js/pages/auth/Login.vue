@@ -122,7 +122,7 @@ watch(
             </div>
 
             <!-- Sign up link -->
-            <div class="text-center text-sm text-gray-600 dark:text-gray-400">
+            <!-- <div class="text-center text-sm text-gray-600 dark:text-gray-400">
                 Belum punya akun?
                 <TextLink
                     :href="route('register')"
@@ -131,7 +131,7 @@ watch(
                 >
                     Daftar sekarang
                 </TextLink>
-            </div>
+            </div> -->
         </form>
     </AuthBase>
 </template>

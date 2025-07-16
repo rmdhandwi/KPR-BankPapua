@@ -29,7 +29,7 @@ watch(
 
     <div class="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:justify-center lg:p-8">
         <!-- Header Navigation -->
-        <header class="mb-6 w-full max-w-[335px] text-sm lg:max-w-4xl">
+        <!-- <header class="mb-6 w-full max-w-[335px] text-sm lg:max-w-4xl">
             <nav class="flex items-center justify-end gap-4">
                 <Link
                     :href="route('login')"
@@ -44,7 +44,7 @@ watch(
                     Daftar
                 </Link>
             </nav>
-        </header>
+        </header> -->
 
         <!-- Main content -->
         <div class="flex w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow">
@@ -70,7 +70,7 @@ watch(
                                 :href="route('login')"
                                 class="inline-block rounded-sm border border-[#20639a] bg-[#20639a] px-5 py-1.5 text-white transition-all hover:bg-[#20519a]"
                             >
-                                Mulai Eksplorasi
+                                Masuk ke Sistem
                             </a>
                         </li>
                     </ul>
