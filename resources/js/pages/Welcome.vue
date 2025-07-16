@@ -1,24 +1,23 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
-import { useToast } from 'vue-toast-notification';
-import { watch } from 'vue';
 import { SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { watch } from 'vue';
+import { useToast } from 'vue-toast-notification';
 
 const page = usePage<SharedData>();
 const toast = useToast();
 
-
 watch(
-  () => page.props.flash.success,
-  (message) => {
-    if (message) {
-      toast.success(message, {
-        position: 'top-right',
-        duration: 3000,
-      });
-    }
-  },
-  { immediate: true }
+    () => page.props.flash.success,
+    (message) => {
+        if (message) {
+            toast.success(message, {
+                position: 'top-right',
+                duration: 3000,
+            });
+        }
+    },
+    { immediate: true },
 );
 </script>
 
@@ -40,7 +39,7 @@ watch(
                 </Link>
                 <Link
                     :href="route('register')"
-                    class="inline-block rounded-sm border px-5 py-1.5 text-sm text-[#1b1b18] transition-all border-[#272727] hover:border-[#20639a]"
+                    class="inline-block rounded-sm border border-[#272727] px-5 py-1.5 text-sm text-[#1b1b18] transition-all hover:border-[#20639a]"
                 >
                     Daftar
                 </Link>
@@ -56,12 +55,13 @@ watch(
                 </div>
 
                 <!-- Informasi / Teks di kanan -->
-                <div
-                    class="flex-1 bg-white p-6 pb-12 text-[13px] leading-[20px] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:p-20"
-                >
-                    <h1 class="mb-1 text-xl font-semibold">Sistem Informasi Pemetaan Potensi Wisata</h1>
+                <div class="flex-1 bg-white p-6 pb-12 text-[13px] leading-[20px] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:p-20">
+                    <h1 class="mb-1 text-xl font-semibold">
+                        Sistem Pendukung Keputusan Kelayakan Pemberian KPR Menggunakan Metode SAW pada Bank Papua Provinsi Papua
+                    </h1>
                     <p class="mb-2 text-[#4a4a48] dark:text-[#A1A09A]">
-                        Berbasis Web dengan Metode <strong>TOPSIS</strong> pada Dinas Pariwisata Kabupaten Jayapura.
+                        Aplikasi berbasis web untuk membantu menentukan kelayakan Kredit Pemilikan Rumah (KPR) menggunakan metode
+                        <strong>Simple Additive Weighting (SAW)</strong>.
                     </p>
 
                     <ul class="flex gap-3 text-sm leading-normal">
