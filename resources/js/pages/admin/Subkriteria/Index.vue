@@ -91,7 +91,6 @@ function doDestroy(id: number) {
         <AdminLayout>
             <div class="space-y-6">
                 <HeadingSmall title="Data sub kriteria" description="Daftar sub kriteria" />
-
                 <Card>
                     <template #content>
                         <DataTable
@@ -126,7 +125,7 @@ function doDestroy(id: number) {
                                 </div>
                             </template>
                             <template #loading>
-                                <span class="flex justify-center">Memuat Data...</span>
+                                <span class="flex justify-center">Sedang Memuat Data...</span>
                             </template>
 
                             <template #empty>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Kriteria;
 use App\Models\Nasabah;
 use App\Models\Subkriteria;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -130,6 +131,24 @@ class PerhitunganController extends Controller
             $lastNilai = $item['nilai_akhir'];
         }
         unset($item);
+
+        // Hapus semua data sebelumnya
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('perhitungan')->truncate(); // akan reset auto increment ke 1
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        foreach ($hasilAkhir as $item) {
+            DB::table('perhitungan')->insert([
+                'id_nasabah'      => $item['id_nasabah'],
+                'skor_akhir'      => $item['nilai_akhir'],
+                'status_kelayakan'=> $item['status'],
+                'tgl_hitung'      => now()->toDateString(),
+                'status_konfimasi'=> 0,
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
+        }
+
 
         return Inertia::render('admin/Perhitungan/Index', [
             'dataAwal'     => $dataAwal,

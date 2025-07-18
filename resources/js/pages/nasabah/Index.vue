@@ -7,14 +7,16 @@ import { computed, onMounted, ref } from 'vue';
 import { useToast } from 'vue-toast-notification';
 
 import { SharedData } from '@/types';
+import { FilterMatchMode } from '@primevue/core/api';
 import { LoaderCircle } from 'lucide-vue-next';
-import { ConfirmDialog, Select } from 'primevue';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dialog from 'primevue/dialog';
-import InputText from 'primevue/inputtext';
+import { Column, ConfirmDialog, DataTable, Select } from 'primevue';
+
+const breadcrumbItems = [
+    {
+        title: 'Data Nasabah',
+        href: '/developer/nasabah',
+    },
+];
 
 const page = usePage<SharedData>();
 const toast = useToast();
@@ -25,6 +27,10 @@ const allColumns = ref<string[]>(page.props.columns || []);
 const loading = ref(true);
 
 const role = page.props.auth.user.role;
+
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+});
 
 onMounted(() => {
     loading.value = false;
@@ -205,104 +211,141 @@ function showDocuments(data: Record<string, any>) {
 </script>
 
 <template>
-    <ConfirmDialog />
     <Head title="Data Nasabah" />
-    <AppLayout>
-        <div class="space-y-6 p-6">
-            <HeadingSmall title="Data Nasabah" description="Daftar nasabah" />
+    <ConfirmDialog />
+    <AppLayout :breadcrumbs="breadcrumbItems">
+        <HeadingSmall title="Data Nasabah" description="Daftar nasabah" />
 
-            <template v-if="role == 2">
-                <div class="flex items-center justify-between">
-                    <Button size="small" label="Tambah Nasabah" as="a" icon="pi pi-plus" severity="info" :href="route('developer.nasabah.create')" />
-                    <div class="flex gap-2">
-                        <Button size="small" label="Tambah Kolom" icon="pi pi-plus" severity="success" @click="showAddDialog = true" />
-                        <Button size="small" label="Hapus Kolom" icon="pi pi-minus" severity="danger" @click="showDeleteDialog = true" />
-                    </div>
-                </div>
+        <Card>
+            <template #content>
+                <DataTable
+                    size="small"
+                    :filters="filters"
+                    :loading="loading"
+                    :value="nasabahData"
+                    paginator
+                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                    currentPageReportTemplate="{first} ke {last} dari {totalRecords}"
+                    :rows="10"
+                    scrollable
+                    scrollHeight="500px"
+                    :rowsPerPageOptions="[5, 10, 20, 50, 100]"
+                    dataKey="id_kriteria"
+                    responsiveLayout="scroll"
+                >
+                    <template #header>
+                        <div class="mb-3 grid gap-2 md:grid-cols-1 lg:grid-cols-3">
+                            <div v-if="role == 2" class="flex justify-items-center">
+                                <Button
+                                    size="small"
+                                    label="Tambah Nasabah"
+                                    as="a"
+                                    icon="pi pi-plus"
+                                    severity="info"
+                                    :href="route('developer.nasabah.create')"
+                                />
+                            </div>
+
+                            <IconField>
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Kata Kunci" class="w-full" />
+                            </IconField>
+
+                            <div v-if="role == 2" class="flex gap-2 md:justify-center lg:justify-end">
+                                <Button size="small" label="Tambah Kolom" icon="pi pi-plus" severity="success" @click="showAddDialog = true" />
+                                <Button size="small" label="Hapus Kolom" icon="pi pi-minus" severity="danger" @click="showDeleteDialog = true" />
+                            </div>
+                        </div>
+                    </template>
+                    <template #loading>
+                        <span class="flex justify-center">Sedang Memuat Data...</span>
+                    </template>
+
+                    <template #empty>
+                        <span class="flex justify-center">Tidak Ada Nasabah</span>
+                    </template>
+
+                    <Column header="No">
+                        <template #body="slotProps">
+                            {{ slotProps.index + 1 }}
+                        </template>
+                    </Column>
+                    <Column
+                        v-for="col in role == 1 ? fixedColumnsAdmin : fixedColumnsDev"
+                        :key="col"
+                        :field="col"
+                        class="capitalize"
+                        :header="col.replace(/_/g, ' ')"
+                        style="min-width: 200px"
+                    >
+                        <template v-if="col === 'kelengkapan_berkas'" #body="{ data }">
+                            <Tag v-if="data.kelengkapan_berkas === 'Lengkap'" icon="pi pi-check" severity="success" value="Lengkap" />
+                            <Tag
+                                v-else-if="data.kelengkapan_berkas === 'Tidak Lengkap'"
+                                icon="pi pi-exclamation-triangle"
+                                severity="warning"
+                                value="Tidak Lengkap"
+                            />
+                            <span v-else class="text-gray-400 italic">Belum dikonfirmasi</span>
+                        </template>
+
+                        <template v-else #body="{ data }">
+                            {{ data[col] }}
+                        </template>
+                    </Column>
+
+                    <Column class="flex gap-2" header="Aksi" frozen align-frozen="right">
+                        <template #body="{ data }">
+                            <Button raised rounded aria-label="Detail" size="small" icon="pi pi-eye" text @click="showDetails(data)" />
+                            <Button
+                                raised
+                                rounded
+                                aria-label="Dokumen"
+                                size="small"
+                                icon="pi pi-file"
+                                text
+                                severity="secondary"
+                                @click="showDocuments(data)"
+                            />
+                            <Button
+                                v-if="role == 2"
+                                raised
+                                rounded
+                                aria-label="Edit"
+                                size="small"
+                                icon="pi pi-pencil"
+                                text
+                                @click="goToEdit(data.id_nasabah)"
+                            />
+                            <Button
+                                v-if="role == 2"
+                                raised
+                                rounded
+                                aria-label="Hapus"
+                                size="small"
+                                icon="pi pi-trash"
+                                text
+                                severity="danger"
+                                @click="confirmDelete(data.id_nasabah)"
+                            />
+                            <Button
+                                v-if="role == 1"
+                                raised
+                                rounded
+                                size="small"
+                                :icon="data.kelengkapan_berkas === 'Lengkap' ? 'pi pi-check-circle' : 'pi pi-times-circle'"
+                                :label="data.kelengkapan_berkas === 'Lengkap' ? 'Lengkap' : 'Tidak Lengkap'"
+                                :severity="data.kelengkapan_berkas === 'Lengkap' ? 'success' : 'danger'"
+                                text
+                                @click="openKelengkapanDialog(data)"
+                            />
+                        </template>
+                    </Column>
+                </DataTable>
             </template>
-
-            <Card>
-                <template #content>
-                    <DataTable :value="nasabahData" :loading="loading" paginator :rows="10">
-                        <Column header="No">
-                            <template #body="slotProps">
-                                {{ slotProps.index + 1 }}
-                            </template>
-                        </Column>
-                        <Column
-                            v-for="col in role == 1 ? fixedColumnsAdmin : fixedColumnsDev"
-                            :key="col"
-                            :field="col"
-                            class="capitalize"
-                            :header="col.replace(/_/g, ' ')"
-                        >
-                            <template v-if="col === 'kelengkapan_berkas'" #body="{ data }">
-                                <Tag v-if="data.kelengkapan_berkas === 'Lengkap'" icon="pi pi-check" severity="success" value="Lengkap" />
-                                <Tag
-                                    v-else-if="data.kelengkapan_berkas === 'Tidak Lengkap'"
-                                    icon="pi pi-exclamation-triangle"
-                                    severity="warning"
-                                    value="Tidak Lengkap"
-                                />
-                                <span v-else class="text-gray-400 italic">Belum dikonfirmasi</span>
-                            </template>
-
-                            <template v-else #body="{ data }">
-                                {{ data[col] }}
-                            </template>
-                        </Column>
-
-                        <Column class="flex gap-2" header="Aksi">
-                            <template #body="{ data }">
-                                <Button raised rounded aria-label="Detail" size="small" icon="pi pi-eye" text @click="showDetails(data)" />
-                                <Button
-                                    raised
-                                    rounded
-                                    aria-label="Dokumen"
-                                    size="small"
-                                    icon="pi pi-file"
-                                    text
-                                    severity="secondary"
-                                    @click="showDocuments(data)"
-                                />
-                                <Button
-                                    v-if="role == 2"
-                                    raised
-                                    rounded
-                                    aria-label="Edit"
-                                    size="small"
-                                    icon="pi pi-pencil"
-                                    text
-                                    @click="goToEdit(data.id_nasabah)"
-                                />
-                                <Button
-                                    v-if="role == 2"
-                                    raised
-                                    rounded
-                                    aria-label="Hapus"
-                                    size="small"
-                                    icon="pi pi-trash"
-                                    text
-                                    severity="danger"
-                                    @click="confirmDelete(data.id_nasabah)"
-                                />
-                                <Button
-                                    v-if="role == 1"
-                                    raised
-                                    rounded
-                                    size="small"
-                                    :icon="data.kelengkapan_berkas === 'Lengkap' ? 'pi pi-check-circle' : 'pi pi-times-circle'"
-                                    :label="data.kelengkapan_berkas === 'Lengkap' ? 'Lengkap' : 'Tidak Lengkap'"
-                                    :severity="data.kelengkapan_berkas === 'Lengkap' ? 'success' : 'danger'"
-                                    text
-                                    @click="openKelengkapanDialog(data)"
-                                />
-                            </template>
-                        </Column>
-                    </DataTable>
-                </template>
-            </Card>
-        </div>
+        </Card>
     </AppLayout>
 
     <!-- Dialog Tambah Kolom -->

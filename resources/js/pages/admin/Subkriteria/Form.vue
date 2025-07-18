@@ -173,9 +173,7 @@ function doSubmit() {
                             :disabled="form.processing"
                             placeholder="Masukkan bobot sub kriteria"
                         />
-                        <Message v-if="form.errors.bobot" severity="error" size="small" variant="simple">{{
-                            form.errors.bobot
-                        }}</Message>
+                        <Message v-if="form.errors.bobot" severity="error" size="small" variant="simple">{{ form.errors.bobot }}</Message>
                     </div>
 
                     <Button type="submit" :label="props.data ? 'Update' : 'Simpan'" class="w-full" :disabled="form.processing">

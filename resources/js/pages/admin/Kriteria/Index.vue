@@ -120,7 +120,7 @@ function doDestroy(id: number) {
                             </template>
 
                             <template #loading>
-                                <span class="flex justify-center">Memuat Data...</span>
+                                <span class="flex justify-center">Sedang Memuat Data...</span>
                             </template>
 
                             <template #empty>

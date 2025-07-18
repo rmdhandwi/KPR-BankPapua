@@ -306,7 +306,7 @@ class NasabahController extends Controller
             }
 
             // Hapus direktori jika sudah kosong
-            $folder = 'nasabah/' . $nasabah->id;
+            $folder = 'nasabah/' . $nasabah->id_nasabah;
             if (Storage::disk('public')->exists($folder)) {
                 Storage::disk('public')->deleteDirectory($folder);
             }

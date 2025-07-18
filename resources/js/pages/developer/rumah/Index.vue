@@ -3,6 +3,7 @@ import HeadingSmall from '@/components/HeadingSmall.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Rumah, SharedData, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/vue3';
+import { FilterMatchMode } from '@primevue/core/api';
 import { ConfirmDialog, useConfirm } from 'primevue';
 import { onMounted, ref, watch } from 'vue';
 import { useToast } from 'vue-toast-notification';
@@ -61,6 +62,10 @@ function doDestroy(id: number) {
     });
 }
 
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+});
+
 // Ambil data rumah dari props page
 onMounted(() => {
     rumahData.value = page.props.rumah ?? [];
@@ -82,53 +87,75 @@ watch(
     <Head title="Data Rumah" />
     <ConfirmDialog />
     <AppLayout :breadcrumbs="breadcrumbItems">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="space-y-6">
-                <HeadingSmall title="Data Rumah" description="Daftar rumah KPR" />
-                <Button as="a" :href="route('developer.rumah.create')" severity="info" size="small" icon="pi pi-plus" label="Tambah data"/>
-                <Card>
-                    <template #content>
-                        <DataTable
-                            :value="rumahData"
-                            :loading="loading"
-                            paginator
-                            :rows="10"
-                            :rowsPerPageOptions="[5, 10, 20]"
-                            dataKey="id_rumah"
-                            responsiveLayout="scroll"
-                        >
-                            <template #loading>
-                                <span class="flex justify-center">Sedang Memuat Data...</span>
-                            </template>
-
-                            <template #empty>
-                                <span class="flex justify-center">Tidak Ada Data Rumah</span>
-                            </template>
-
-                            <Column header="No">
-                                <template #body="slotProps">
-                                    {{ slotProps.index + 1 }}
-                                </template>
-                            </Column>
-                            <Column field="nama" header="Nama" />
-                            <Column field="tipe" header="Tipe" />
-                            <Column field="luas_bangunan" header="Luas Bangunan (m²)" />
-                            <Column field="luas_tanah" header="Luas Tanah (m²)" />
-                            <Column field="harga" header="Harga (Rp)" />
-                            <Column field="karakteristik" header="Karakteristik" />
-
-                            <Column frozen align-frozen="right">
-                                <template #body="slotProps">
-                                    <div class="flex justify-center gap-2">
-                                        <Button severity="info" size="small" icon="pi pi-pen-to-square" @click="goToEdit(slotProps.data.id_rumah)" />
-                                        <Button severity="danger" size="small" icon="pi pi-trash" @click="confirmDelete(slotProps.data.id_rumah)" />
-                                    </div>
-                                </template>
-                            </Column>
-                        </DataTable>
+        <HeadingSmall title="Data Rumah" description="Daftar rumah KPR" />
+        <Card>
+            <template #content>
+                <DataTable
+                    :filters="filters"
+                    :value="rumahData"
+                    :loading="loading"
+                    dataKey="id_rumah"
+                    responsiveLayout="scroll"
+                    size="small"
+                    paginator
+                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                    currentPageReportTemplate="{first} ke {last} dari {totalRecords}"
+                    :rows="10"
+                    scrollable
+                    scrollHeight="500px"
+                    :rowsPerPageOptions="[5, 10, 20, 50, 100]"
+                >
+                    <template #header>
+                        <div class="mb-3 grid gap-2 md:grid-cols-1 lg:grid-cols-2">
+                            <div class="flex">
+                                <Button
+                                    as="a"
+                                    :href="route('developer.rumah.create')"
+                                    severity="info"
+                                    size="small"
+                                    icon="pi pi-plus"
+                                    label="Tambah data"
+                                />
+                            </div>
+                            <IconField>
+                                <InputIcon>
+                                    <i class="pi pi-search" />
+                                </InputIcon>
+                                <InputText v-model="filters['global'].value" placeholder="Kata Kunci" class="w-full" />
+                            </IconField>
+                        </div>
                     </template>
-                </Card>
-            </div>
-        </div>
+
+                    <template #loading>
+                        <span class="flex justify-center">Sedang Memuat Data...</span>
+                    </template>
+
+                    <template #empty>
+                        <span class="flex justify-center">Tidak Ada Data Rumah</span>
+                    </template>
+
+                    <Column header="No">
+                        <template #body="slotProps">
+                            {{ slotProps.index + 1 }}
+                        </template>
+                    </Column>
+                    <Column field="nama" header="Nama" />
+                    <Column field="tipe" header="Tipe" />
+                    <Column field="luas_bangunan" header="Luas Bangunan (m²)" />
+                    <Column field="luas_tanah" header="Luas Tanah (m²)" />
+                    <Column field="harga" header="Harga (Rp)" />
+                    <Column field="karakteristik" header="Karakteristik" />
+
+                    <Column frozen align-frozen="right">
+                        <template #body="slotProps">
+                            <div class="flex justify-center gap-2">
+                                <Button severity="info" size="small" icon="pi pi-pen-to-square" @click="goToEdit(slotProps.data.id_rumah)" />
+                                <Button severity="danger" size="small" icon="pi pi-trash" @click="confirmDelete(slotProps.data.id_rumah)" />
+                            </div>
+                        </template>
+                    </Column>
+                </DataTable>
+            </template>
+        </Card>
     </AppLayout>
 </template>

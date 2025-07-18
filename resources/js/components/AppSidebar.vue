@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { SharedData, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { Calculator, HomeIcon, LayoutGrid, MapPinned, NotebookText, Users } from 'lucide-vue-next';
+import { Calculator, Dock, HomeIcon, LayoutGrid, NotebookText, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogoIcon from './AppLogoIcon.vue';
 
@@ -39,15 +39,10 @@ const mainNavItems = computed<NavItem[]>(() => {
                     href: '/admin/perhitungan',
                     icon: Calculator,
                 },
-                // {
-                //     title: 'Perhitungan',
-                //     href: '/admin/laporan',
-                //     icon: MapPinned,
-                // },
                 {
                     title: 'Laporan',
                     href: '/admin/laporan',
-                    icon: MapPinned,
+                    icon: Dock,
                 },
             ];
         case 2: // Developer
