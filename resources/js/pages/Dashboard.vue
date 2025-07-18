@@ -58,7 +58,7 @@ watch(
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 <DashboardCard
                     icon="pi pi-users"
-                    :href="userRole === 1 ? route('admin.nasabah.index') : route('admin.developer.index')"
+                    :href="userRole === 1 ? route('admin.nasabah.index') : route('developer.nasabah.index')"
                     title="Jumlah Nasabah"
                     :value="nasabahCount"
                     bg="bg-green-100"
@@ -102,7 +102,14 @@ watch(
                 </template>
 
                 <template v-if="userRole === 2">
-                    <DashboardCard icon="pi pi-home" title="Jumlah Rumah" :value="rumahCount" bg="bg-blue-100" text="text-blue-600" />
+                    <DashboardCard
+                        :href="route('developer.rumah.index')"
+                        icon="pi pi-home"
+                        title="Jumlah Rumah"
+                        :value="rumahCount"
+                        bg="bg-blue-100"
+                        text="text-blue-600"
+                    />
                 </template>
             </div>
         </div>

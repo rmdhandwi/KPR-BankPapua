@@ -31,7 +31,8 @@ onMounted(() => {
 });
 
 // Kolom tetap yang ditampilkan di tabel
-const fixedColumns = ['nama_lengkap', 'no_ktp', 'email', 'penghasilan', 'kelengkapan_berkas'];
+const fixedColumnsAdmin = ['nama_lengkap', 'no_ktp', 'email', 'penghasilan', 'kelengkapan_berkas'];
+const fixedColumnsDev = ['nama_lengkap', 'no_ktp', 'email', 'penghasilan'];
 
 const hiddenFieldDetails = [
     'id_nasabah',
@@ -228,7 +229,13 @@ function showDocuments(data: Record<string, any>) {
                                 {{ slotProps.index + 1 }}
                             </template>
                         </Column>
-                        <Column class="capitalize" v-for="col in fixedColumns" :key="col" :field="col" :header="col.replace(/_/g, ' ')">
+                        <Column
+                            v-for="col in role == 1 ? fixedColumnsAdmin : fixedColumnsDev"
+                            :key="col"
+                            :field="col"
+                            class="capitalize"
+                            :header="col.replace(/_/g, ' ')"
+                        >
                             <template v-if="col === 'kelengkapan_berkas'" #body="{ data }">
                                 <Tag v-if="data.kelengkapan_berkas === 'Lengkap'" icon="pi pi-check" severity="success" value="Lengkap" />
                                 <Tag
@@ -238,6 +245,10 @@ function showDocuments(data: Record<string, any>) {
                                     value="Tidak Lengkap"
                                 />
                                 <span v-else class="text-gray-400 italic">Belum dikonfirmasi</span>
+                            </template>
+
+                            <template v-else #body="{ data }">
+                                {{ data[col] }}
                             </template>
                         </Column>
 
@@ -299,7 +310,14 @@ function showDocuments(data: Record<string, any>) {
         <div class="space-y-3">
             <InputText v-model="newColumnName" placeholder="nama_kolom" class="w-full" />
             <Message v-if="form.errors.name" severity="error" size="small" variant="simple">{{ form.errors.name }}</Message>
-            <Button fluid label="Simpan" @click="submitNewColumn" />
+            <Button fluid label="Simpan" @click="submitNewColumn">
+                <template #default>
+                    <span v-if="form.processing" class="flex items-center justify-center gap-2">
+                        <LoaderCircle class="h-4 w-4 animate-spin" />
+                        Memproses...
+                    </span>
+                </template>
+            </Button>
         </div>
     </Dialog>
 

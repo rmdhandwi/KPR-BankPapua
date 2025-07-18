@@ -102,19 +102,19 @@ function doSubmit() {
                 <form @submit.prevent="submit()" class="max-w-xl space-y-5">
                     <div>
                         <Label class="mb-2" for="nama">Nama Rumah</Label>
-                        <InputText v-model="form.nama" id="nama" class="w-full" :invalid="!!form.errors.nama" />
+                        <InputText :disabled="form.processing" v-model="form.nama" id="nama" class="w-full" :invalid="!!form.errors.nama" />
                         <Message variant="simple" size="small" v-if="form.errors.nama" severity="error">{{ form.errors.nama }}</Message>
                     </div>
 
                     <div>
                         <Label class="mb-2" for="tipe">Tipe</Label>
-                        <InputText v-model="form.tipe" id="tipe" class="w-full" :invalid="!!form.errors.tipe" />
+                        <InputText :disabled="form.processing" v-model="form.tipe" id="tipe" class="w-full" :invalid="!!form.errors.tipe" />
                         <Message variant="simple" size="small" v-if="form.errors.tipe" severity="error">{{ form.errors.tipe }}</Message>
                     </div>
 
                     <div>
                         <Label class="mb-2" for="luas_bangunan">Luas Bangunan (m²)</Label>
-                        <InputText v-model="form.luas_bangunan" id="luas_bangunan" class="w-full" :invalid="!!form.errors.luas_bangunan" />
+                        <InputText :disabled="form.processing" v-model="form.luas_bangunan" id="luas_bangunan" class="w-full" :invalid="!!form.errors.luas_bangunan" />
                         <Message variant="simple" size="small" v-if="form.errors.luas_bangunan" severity="error">{{
                             form.errors.luas_bangunan
                         }}</Message>
@@ -122,26 +122,26 @@ function doSubmit() {
 
                     <div>
                         <Label class="mb-2" for="luas_tanah">Luas Tanah (m²)</Label>
-                        <InputText v-model="form.luas_tanah" id="luas_tanah" class="w-full" :invalid="!!form.errors.luas_tanah" />
+                        <InputText :disabled="form.processing" v-model="form.luas_tanah" id="luas_tanah" class="w-full" :invalid="!!form.errors.luas_tanah" />
                         <Message variant="simple" size="small" v-if="form.errors.luas_tanah" severity="error">{{ form.errors.luas_tanah }}</Message>
                     </div>
 
                     <div>
                         <Label class="mb-2" for="harga">Harga (Rp)</Label>
-                        <InputText v-model="form.harga" id="harga" class="w-full" :invalid="!!form.errors.harga" />
+                        <InputText :disabled="form.processing" v-model="form.harga" id="harga" class="w-full" :invalid="!!form.errors.harga" />
                         <Message variant="simple" size="small" v-if="form.errors.harga" severity="error">{{ form.errors.harga }}</Message>
                     </div>
 
                     <div>
                         <Label class="mb-2" for="karakteristik">Karakteristik</Label>
-                        <Textarea v-model="form.karakteristik" id="karakteristik" rows="3" class="w-full" :invalid="!!form.errors.karakteristik" />
+                        <Textarea :disabled="form.processing" v-model="form.karakteristik" id="karakteristik" rows="3" class="w-full" :invalid="!!form.errors.karakteristik" />
                         <Message variant="simple" size="small" v-if="form.errors.karakteristik" severity="error">{{
                             form.errors.karakteristik
                         }}</Message>
                     </div>
 
                     <div class="flex gap-2">
-                        <Button type="button" label="Back" severity="secondary" class="w-full" as="a" :href="route('developer.rumah.index')" />
+                        <Button type="button" label="Kembali" severity="secondary" class="w-full" as="a" :href="route('developer.rumah.index')" />
                         <Button type="submit" :label="props.data ? 'Update' : 'Simpan'" class="w-full" :loading="form.processing">
                             <template #default>
                                 <span v-if="form.processing" class="flex items-center justify-center gap-2">

@@ -8,6 +8,7 @@ import { ConfirmDialog, DatePicker, Message, Select, useConfirm } from 'primevue
 import { computed, onMounted } from 'vue';
 import { useToast } from 'vue-toast-notification';
 
+import { LoaderCircle } from 'lucide-vue-next';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import RadioButton from 'primevue/radiobutton';
@@ -168,6 +169,16 @@ function submit() {
         confirm.require({
             message: 'Yakin ingin mengubah data nasabah ini?',
             header: 'Konfirmasi',
+            icon: 'pi pi-info-circle',
+            rejectProps: {
+                label: 'Batal',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptProps: {
+                label: 'Ya',
+                severity: 'danger',
+            },
             accept: postAction,
             reject: () => toast.info('Batal mengubah', { position: 'top-right' }),
         });
@@ -243,6 +254,7 @@ function onFileSelect(event: any, key: string) {
 
                     <!-- Input Text -->
                     <InputText
+                        :disabled="form.processing"
                         v-else
                         v-model="form[key]"
                         :maxlength="['no_ktp', 'no_kk', 'no_tlp'].includes(key) ? 16 : undefined"
@@ -265,7 +277,7 @@ function onFileSelect(event: any, key: string) {
 
                     <div class="flex flex-col gap-2">
                         <div v-for="opt in options[key]" :key="opt" class="flex items-center gap-2">
-                            <RadioButton :inputId="key + opt" :value="opt" v-model="form[key]" />
+                            <RadioButton :disabled="form.processing" :inputId="key + opt" :value="opt" v-model="form[key]" />
                             <label :for="key + opt">{{ opt }}</label>
                         </div>
                     </div>
@@ -283,7 +295,7 @@ function onFileSelect(event: any, key: string) {
                     <div class="grid grid-cols-2 gap-4">
                         <div v-for="col in dynamicFields" :key="col" class="flex flex-col gap-1">
                             <Label :for="col" class="capitalize">{{ col.replace(/_/g, ' ') }}</Label>
-                            <InputText :id="col" v-model="form[col]" class="w-full" :invalid="!!form.errors[col]" />
+                            <InputText :disabled="form.processing" :id="col" v-model="form[col]" class="w-full" :invalid="!!form.errors[col]" />
                             <Message v-if="form.errors[col]" severity="error" size="small" variant="simple">
                                 {{ form.errors[col] }}
                             </Message>
@@ -329,7 +341,14 @@ function onFileSelect(event: any, key: string) {
             <!-- Actions -->
             <div class="col-span-2 mt-4 flex justify-between gap-3">
                 <Button as="a" label="Kembali" type="button" :href="route('developer.nasabah.index')" severity="secondary" />
-                <Button :label="props.data ? 'Update' : 'Simpan'" @click="submit" :loading="form.processing" />
+                <Button @click="submit" :label="props.data ? 'Update' : 'Simpan'" :loading="form.processing">
+                    <template #default>
+                        <span v-if="form.processing" class="flex items-center justify-center gap-2">
+                            <LoaderCircle class="h-4 w-4 animate-spin" />
+                            Memproses...
+                        </span>
+                    </template>
+                </Button>
             </div>
         </div>
     </AppLayout>
