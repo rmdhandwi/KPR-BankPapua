@@ -143,7 +143,7 @@ class PerhitunganController extends Controller
                 'skor_akhir'      => $item['nilai_akhir'],
                 'status_kelayakan'=> $item['status'],
                 'tgl_hitung'      => now()->toDateString(),
-                'status_konfimasi'=> 0,
+                // 'status_konfimasi'=> 0,
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ]);
