@@ -89,10 +89,17 @@ const kelengkapanForm = useForm({
     kelengkapan_berkas: '',
 });
 
+interface KelengkapanForm {
+    kelengkapan_berkas: string | null;
+}
+
 function openKelengkapanDialog(nasabah: any) {
     selectedNasabahId.value = nasabah.id_nasabah;
     selectedKelengkapan.value = nasabah.kelengkapan_berkas ?? 'Tidak Lengkap';
-    kelengkapanForm.kelengkapan_berkas = selectedKelengkapan.value;
+    if (typeof selectedKelengkapan.value === 'string') {
+        kelengkapanForm.kelengkapan_berkas = selectedKelengkapan.value;
+    }
+
     kelengkapanDialog.value = true;
 }
 

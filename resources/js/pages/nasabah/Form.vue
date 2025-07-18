@@ -41,6 +41,7 @@ const options: Record<string, string[]> = {
     riwayat_pinjol: ['Sedang Meminjam', 'Pernah Meminjam', 'Belum Pernah Meminjam'],
     riwayat_kredit: ['Kredit Macet', 'Belum Pernah Kredit', 'Kredit Lancar'],
     jml_tanggungan: ['1 Orang', '2-5 Orang', '> 5 Orang'],
+    kewarganegaraan: ['WNA', 'WNI'],
 };
 
 const fixedFields: { key: string; label: string }[] = [
@@ -113,7 +114,7 @@ function submit() {
     const isEdit = !!props.data;
     const url = isEdit ? route('developer.nasabah.update', props.data?.id_nasabah) : route('developer.nasabah.store');
 
-    // Format tanggal sebelum submit
+    // Format tanggal
     Object.keys(form.data()).forEach((key) => {
         if (/tanggal|tgl_/i.test(key) && form[key]) {
             form[key] = formatDateToYMD(form[key]);
@@ -121,26 +122,27 @@ function submit() {
     });
 
     const formData = new FormData();
-    // Tambahkan data teks
+
+    // Tambahkan data teks ke FormData
     for (const key in form.data()) {
-        if (key === 'kelengkapan_berkas') continue;
-
-        // Jangan kirim path file ke FormData jika tidak diganti
-        if (Object.keys(files.value).includes(key)) {
-            // Kalau tidak ada file baru diupload, kirim value sebagai text biasa (bukan FormData file)
-            if (!files.value[key]) {
-                formData.append(key, form[key]); // tetap kirim path-nya
-            }
-            continue; // agar tidak double append nanti di bagian File
+        if (key !== 'kelengkapan_berkas') {
+            formData.append(key, form[key] ?? '');
         }
-
-        formData.append(key, form[key] ?? '');
     }
 
-    // Tambahkan file
+    Object.entries(form).forEach(([key, value]) => {
+        if (key !== 'KTP' && key !== 'NPWP' && key !== 'surat_nikah' && key !== 'spt_tahunan' && key !== 'kartu_keluarga') {
+            formData.append(key, value);
+        }
+    });
+
+    // Ini penting: sertakan file baru jika ada, atau path lama jika tidak
     Object.entries(files.value).forEach(([key, file]) => {
         if (file instanceof File) {
             formData.append(key, file);
+        } else if (form[key]) {
+            // Misalnya: form.KTP berisi path lama
+            formData.append(`${key}_lama`, form[key]);
         }
     });
 
@@ -153,10 +155,9 @@ function submit() {
                 toast.success(page.props.flash?.success || (isEdit ? 'Data berhasil diperbarui' : 'Data berhasil disimpan'), {
                     position: 'top-right',
                 });
-                form.clearErrors(); // bersihkan error
+                form.clearErrors();
             },
             onError: (errors) => {
-                // Salin error manual ke form agar binding tetap jalan
                 form.setError(errors);
                 toast.error(page.props.flash?.error || 'Gagal menyimpan data', { position: 'top-right' });
             },
@@ -244,7 +245,7 @@ function onFileSelect(event: any, key: string) {
                     <InputText
                         v-else
                         v-model="form[key]"
-                        :maxlength="['no_ktp', 'no_kk'].includes(key) ? 16 : undefined"
+                        :maxlength="['no_ktp', 'no_kk', 'no_tlp'].includes(key) ? 16 : undefined"
                         :id="key"
                         class="w-full"
                         :invalid="!!form.errors[key]"
@@ -258,7 +259,7 @@ function onFileSelect(event: any, key: string) {
             </div>
 
             <!-- Radio Button Fields -->
-            <div class="mt-6 grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div class="mt-6 grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-2 lg:grid-cols-6">
                 <div v-for="{ key, label } in radioFields" :key="key" class="flex flex-col gap-2">
                     <Label :for="key">{{ label }}</Label>
 

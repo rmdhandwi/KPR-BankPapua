@@ -162,7 +162,7 @@ class NasabahController extends Controller
             $nasabahData = collect($validated)->except($fileFields)->toArray();
 
             // Tambahkan nilai default untuk kelengkapan_berkas
-            $nasabahData['kelengkapan_berkas'] = 'Tidak Lengkap'; 
+            $nasabahData['kelengkapan_berkas'] = 'Tidak Lengkap';
 
             // Simpan nasabah
             $nasabah = Nasabah::create($nasabahData);
@@ -186,8 +186,6 @@ class NasabahController extends Controller
             return back()->withInput()->with('error', 'Gagal menyimpan data nasabah.');
         }
     }
-
-
 
 
     public function editInit(Request $request): RedirectResponse
@@ -219,6 +217,7 @@ class NasabahController extends Controller
 
     public function update(NasabahRequest $request, Nasabah $nasabah): RedirectResponse
     {
+
         try {
             $validated = $request->validated();
             $fileFields = ['KTP', 'NPWP', 'surat_nikah', 'spt_tahunan', 'kartu_keluarga'];
@@ -231,12 +230,14 @@ class NasabahController extends Controller
                 $nonFileData->put('kelengkapan_berkas', $nasabah->kelengkapan_berkas);
             }
 
-            $nasabah->update($nonFileData->toArray());
+            // Persiapkan array data akhir untuk update
+            $updateData = $nonFileData->toArray();
 
             $folder = 'nasabah/' . $nasabah->id_nasabah;
 
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
+                    // Hapus file lama jika ada
                     if ($nasabah->$field && Storage::disk('public')->exists($nasabah->$field)) {
                         Storage::disk('public')->delete($nasabah->$field);
                     }
@@ -244,18 +245,24 @@ class NasabahController extends Controller
                     $file = $request->file($field);
                     $filename = $field . '_' . time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
                     $path = $file->storeAs($folder, $filename, 'public');
-                    $nasabah->$field = $path;
+
+                    // Masukkan ke data update
+                    $updateData[$field] = $path;
+                } elseif ($request->filled("{$field}_lama")) {
+                    $nasabah->$field = $request->input("{$field}_lama");
                 }
             }
 
-            $nasabah->save();
+            $nasabah->update($updateData);
 
-            return redirect()->route('developer.nasabah.index')->with('success', 'Data nasabah berhasil diperbarui.');
+            return redirect()->route('developer.nasabah.index')
+                ->with('success', 'Data nasabah berhasil diperbarui.');
         } catch (\Throwable $e) {
             Log::error('Gagal update nasabah: ' . $e->getMessage());
             return back()->withInput()->with('error', 'Terjadi kesalahan saat memperbarui data.');
         }
     }
+
 
 
 

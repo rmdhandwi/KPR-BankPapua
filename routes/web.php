@@ -5,6 +5,7 @@ use App\Http\Controllers\admin\PerhitunganController;
 use App\Http\Controllers\admin\SubkriteriaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\developer\RumahController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\NasabahController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,7 @@ Route::middleware(['auth', 'role:1'])
     ->name('admin.')
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
     })->group(
         function () {
             Route::prefix('nasabah')
@@ -109,22 +111,11 @@ Route::middleware(['auth', 'role:1'])
             Route::prefix('perhitungan')
                 ->name('perhitungan.')
                 ->group(function () {
-
                     // Lihat semua data
                     Route::get('/', [PerhitunganController::class, 'index'])->name('index');
-
-                    // // Tambah data
-                    // Route::get('/create', [SubkriteriaController::class, 'create'])->name('create');
-                    // Route::post('/', [SubkriteriaController::class, 'store'])->name('store');
-
-                    // // Edit data tanpa ID di URL
-                    // Route::post('/edit/init', [SubkriteriaController::class, 'editInit'])->name('edit.init');
-                    // Route::get('/edit', [SubkriteriaController::class, 'edit'])->name('edit');
-                    // Route::put('/{perhitungan}', [SubkriteriaController::class, 'update'])->name('update');
-
-                    // // Hapus data
-                    // Route::delete('/{perhitungan}', [SubkriteriaController::class, 'destroy'])->name('destroy');
                 });
+
+
         }
     );
 
