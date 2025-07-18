@@ -48,8 +48,10 @@ class Rumah extends Model
     }
 
 
-    public function Nasabah()
+    public function nasabah()
     {
         return $this->hasMany(Nasabah::class, 'id_rumah', 'id_rumah');
     }
+
+    
 }

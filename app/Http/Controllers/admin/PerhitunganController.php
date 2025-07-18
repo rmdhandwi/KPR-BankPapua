@@ -141,7 +141,7 @@ class PerhitunganController extends Controller
             DB::table('perhitungan')->insert([
                 'id_nasabah'      => $item['id_nasabah'],
                 'skor_akhir'      => $item['nilai_akhir'],
-                'status_kelayakan'=> $item['status'],
+                'status_kelayakan' => $item['status'],
                 'tgl_hitung'      => now()->toDateString(),
                 // 'status_konfimasi'=> 0,
                 'created_at'      => now(),

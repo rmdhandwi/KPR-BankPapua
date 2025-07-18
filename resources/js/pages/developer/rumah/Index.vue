@@ -139,18 +139,35 @@ watch(
                             {{ slotProps.index + 1 }}
                         </template>
                     </Column>
-                    <Column field="nama" header="Nama" />
-                    <Column field="tipe" header="Tipe" />
-                    <Column field="luas_bangunan" header="Luas Bangunan (m²)" />
-                    <Column field="luas_tanah" header="Luas Tanah (m²)" />
-                    <Column field="harga" header="Harga (Rp)" />
-                    <Column field="karakteristik" header="Karakteristik" />
+                    <Column style="min-width: 200px" field="nama" header="Nama" />
+                    <Column style="min-width: 200px" field="tipe" header="Tipe" />
+                    <Column style="min-width: 200px" field="luas_bangunan" header="Luas Bangunan (m²)" />
+                    <Column style="min-width: 200px" field="luas_tanah" header="Luas Tanah (m²)" />
+                    <Column style="min-width: 200px" field="harga" header="Harga (Rp)" />
+                    <Column style="min-width: 200px" field="karakteristik" header="Karakteristik" />
 
                     <Column frozen align-frozen="right">
                         <template #body="slotProps">
                             <div class="flex justify-center gap-2">
-                                <Button severity="info" size="small" icon="pi pi-pen-to-square" @click="goToEdit(slotProps.data.id_rumah)" />
-                                <Button severity="danger" size="small" icon="pi pi-trash" @click="confirmDelete(slotProps.data.id_rumah)" />
+                                <Button
+                                    raised
+                                    rounded
+                                    aria-label="Edit"
+                                    size="small"
+                                    icon="pi pi-pencil"
+                                    text
+                                    @click="goToEdit(slotProps.data.id_rumah)"
+                                />
+                                <Button
+                                    raised
+                                    rounded
+                                    aria-label="Hapus"
+                                    size="small"
+                                    icon="pi pi-trash"
+                                    text
+                                    severity="danger"
+                                    @click="confirmDelete(slotProps.data.id_rumah)"
+                                />
                             </div>
                         </template>
                     </Column>

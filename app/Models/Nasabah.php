@@ -44,4 +44,9 @@ class Nasabah extends Model
         return $this->belongsTo(Rumah::class, 'id_rumah', 'id_rumah');
     }
 
+    public function perhitungan()
+    {
+        return $this->hasMany(Perhitungan::class, 'id_nasabah', 'id_nasabah');
+    }
+
 }

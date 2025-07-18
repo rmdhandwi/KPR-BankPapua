@@ -34,8 +34,20 @@ Route::middleware(['auth', 'role:1'])
     ->name('admin.')
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
-    })->group(
+    })
+    ->group(
+        function () {
+            Route::prefix('laporan')
+                ->name('laporan.')
+                ->group(function () {
+                    Route::get('/', [LaporanController::class, 'index'])->name('index');
+                    Route::post('/kirim-persetujuan', [LaporanController::class, 'kirimPersetujuan'])
+                        ->name('kirim-persetujuan');
+                    Route::post('/print', [LaporanController::class, 'print'])->name('print');
+                });
+        }
+    )
+    ->group(
         function () {
             Route::prefix('nasabah')
                 ->name('nasabah.')
@@ -114,8 +126,6 @@ Route::middleware(['auth', 'role:1'])
                     // Lihat semua data
                     Route::get('/', [PerhitunganController::class, 'index'])->name('index');
                 });
-
-
         }
     );
 

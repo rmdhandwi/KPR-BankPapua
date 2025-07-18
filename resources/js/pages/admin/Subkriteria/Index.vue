@@ -148,7 +148,7 @@ function doDestroy(id: number) {
                                 <template #body="slotProps">
                                     <div class="flex place-content-center gap-2">
                                         <Button
-                                           raised
+                                            raised
                                             rounded
                                             aria-label="Edit"
                                             size="small"
@@ -157,7 +157,7 @@ function doDestroy(id: number) {
                                             @click="goToEdit(slotProps.data.id_subkriteria)"
                                         />
                                         <Button
-                                             raised
+                                            raised
                                             rounded
                                             aria-label="Hapus"
                                             size="small"

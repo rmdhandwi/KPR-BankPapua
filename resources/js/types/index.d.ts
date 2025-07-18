@@ -36,6 +36,8 @@ export interface SharedData extends PageProps {
     kriteria: Kriteria[];
     rumah: Rumah[];
     columns: string[];
+    hasil: Hasil[];
+    laporan: Laporan[];
 }
 
 export interface User {
@@ -102,6 +104,24 @@ export interface Subkriteria{
     nama_subkriteria: number,
     id_kriteria: number
     bobot: string
+}
+
+export interface Hasil{
+    id_perhitungan: number,
+    id_nasabah: number,
+    skor_akhir: number
+    status_kelayakan: string
+    tgl_hitung: string
+}
+
+export interface Laporan{
+    id_perhitungan: number,
+    nama_lengkap: string,
+    email: string,
+    nama: string,
+    tipe: string,
+    status_kelayakan: string
+    skor_akhir: string
 }
 
 
