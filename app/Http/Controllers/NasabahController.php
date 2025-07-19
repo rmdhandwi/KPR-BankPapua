@@ -143,9 +143,13 @@ class NasabahController extends Controller
 
     public function create()
     {
+        // Ambil semua nama kolom dari tabel 'nasabah'
         $columns = Schema::getColumnListing('nasabah');
+
+        // Ambil data rumah untuk dropdown, hanya field yang dibutuhkan
         $rumah = Rumah::select('id_rumah', 'nama', 'tipe')->get();
 
+        // Tampilkan view Form dengan data kolom dan rumah
         return Inertia::render('nasabah/Form', [
             'columns' => $columns,
             'rumah' => $rumah

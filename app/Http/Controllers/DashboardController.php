@@ -15,25 +15,31 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        // Ambil data user yang sedang login
         $user = Auth::user();
 
-        // Data yang selalu tersedia
-        $nasabahCount = Nasabah::count();
-        $rumahCount = Rumah::count();
+        // Data yang selalu tersedia untuk semua role
+        $nasabahCount = Nasabah::count(); // Total nasabah
+        $rumahCount = Rumah::count();     // Total rumah
 
-        // Data tambahan untuk admin
+        // Inisialisasi variabel tambahan untuk admin (role 1)
         $kriteriaCount = null;
         $subKriteriaCount = null;
         $nasabahLengkap = null;
         $nasabahTidakLengkap = null;
 
+        // Jika user adalah admin
         if ($user->role === 1) {
+            // Hitung total kriteria dan subkriteria
             $kriteriaCount = Kriteria::count();
             $subKriteriaCount = Subkriteria::count();
+
+            // Hitung nasabah berdasarkan kelengkapan berkas
             $nasabahLengkap = Nasabah::where('kelengkapan_berkas', 'Lengkap')->count();
             $nasabahTidakLengkap = Nasabah::where('kelengkapan_berkas', 'Tidak Lengkap')->count();
         }
 
+        // Render halaman dashboard dengan data yang sudah dikumpulkan
         return Inertia::render('Dashboard', [
             'nasabahCount' => $nasabahCount,
             'rumahCount' => $rumahCount,

@@ -6,7 +6,7 @@ import { SharedData } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 import { ConfirmDialog, useConfirm } from 'primevue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useToast } from 'vue-toast-notification';
 
 const breadcrumbItems = [
@@ -27,6 +27,49 @@ const props = defineProps<{
         karakteristik: string;
     };
 }>();
+
+const tipeRumah = [
+    {
+        label: 'Tipe 21',
+        value: 'Tipe 21',
+        luas_bangunan: 21,
+        luas_tanah: 60,
+        harga: 150000000,
+        karakteristik: '1 kamar tidur',
+    },
+    {
+        label: 'Tipe 36',
+        value: 'Tipe 36',
+        luas_bangunan: 36,
+        luas_tanah: 72,
+        harga: 300000000,
+        karakteristik: '2 kamar tidur, 1 kamar mandi, ruang tamu & dapur',
+    },
+    {
+        label: 'Tipe 45',
+        value: 'Tipe 45',
+        luas_bangunan: 45,
+        luas_tanah: 90,
+        harga: 450000000,
+        karakteristik: '2-3 kamar tidur',
+    },
+    {
+        label: 'Tipe 60',
+        value: 'Tipe 60',
+        luas_bangunan: 60,
+        luas_tanah: 120,
+        harga: 450000000,
+        karakteristik: '3 kamar tidur, 2 kamar mandi, bisa 1-2 lantai',
+    },
+    {
+        label: 'Tipe 70',
+        value: 'Tipe 70',
+        luas_bangunan: 70,
+        luas_tanah: 150,
+        harga: 700000000,
+        karakteristik: 'Rumah mewah, 2 lantai, fasilitas lengkap',
+    },
+];
 
 const page = usePage<SharedData>();
 const toast = useToast();
@@ -89,6 +132,20 @@ function doSubmit() {
         });
     }
 }
+
+watch(
+    () => form.tipe,
+    (newValue) => {
+        const selected = tipeRumah.find(t => t.value === newValue);
+        if (selected) {
+            form.luas_bangunan = selected.luas_bangunan.toString();
+            form.luas_tanah = selected.luas_tanah.toString();
+            form.harga = selected.harga.toString();
+            form.karakteristik = selected.karakteristik;
+        }
+    }
+);
+
 </script>
 
 <template>
@@ -107,14 +164,24 @@ function doSubmit() {
                     </div>
 
                     <div>
-                        <Label class="mb-2" for="tipe">Tipe</Label>
-                        <InputText :disabled="form.processing" v-model="form.tipe" id="tipe" class="w-full" :invalid="!!form.errors.tipe" />
+                        <Label class="mb-2" for="tipe">Tipe Rumah</Label>
+                        <Dropdown
+                            inputId="tipe"
+                            class="w-full"
+                            :options="tipeRumah"
+                            v-model="form.tipe"
+                            optionLabel="label"
+                            optionValue="value"
+                            :disabled="form.processing"
+                            :invalid="!!form.errors.tipe"
+                            placeholder="Pilih Tipe Rumah"
+                        />
                         <Message variant="simple" size="small" v-if="form.errors.tipe" severity="error">{{ form.errors.tipe }}</Message>
                     </div>
 
                     <div>
                         <Label class="mb-2" for="luas_bangunan">Luas Bangunan (m²)</Label>
-                        <InputText :disabled="form.processing" v-model="form.luas_bangunan" id="luas_bangunan" class="w-full" :invalid="!!form.errors.luas_bangunan" />
+                        <InputText disabled v-model="form.luas_bangunan" id="luas_bangunan" class="w-full" :invalid="!!form.errors.luas_bangunan" />
                         <Message variant="simple" size="small" v-if="form.errors.luas_bangunan" severity="error">{{
                             form.errors.luas_bangunan
                         }}</Message>
@@ -122,19 +189,25 @@ function doSubmit() {
 
                     <div>
                         <Label class="mb-2" for="luas_tanah">Luas Tanah (m²)</Label>
-                        <InputText :disabled="form.processing" v-model="form.luas_tanah" id="luas_tanah" class="w-full" :invalid="!!form.errors.luas_tanah" />
+                        <InputText disabled v-model="form.luas_tanah" id="luas_tanah" class="w-full" :invalid="!!form.errors.luas_tanah" />
                         <Message variant="simple" size="small" v-if="form.errors.luas_tanah" severity="error">{{ form.errors.luas_tanah }}</Message>
                     </div>
 
                     <div>
                         <Label class="mb-2" for="harga">Harga (Rp)</Label>
-                        <InputText :disabled="form.processing" v-model="form.harga" id="harga" class="w-full" :invalid="!!form.errors.harga" />
+                        <InputText disabled v-model="form.harga" id="harga" class="w-full" :invalid="!!form.errors.harga" />
                         <Message variant="simple" size="small" v-if="form.errors.harga" severity="error">{{ form.errors.harga }}</Message>
                     </div>
 
                     <div>
                         <Label class="mb-2" for="karakteristik">Karakteristik</Label>
-                        <Textarea :disabled="form.processing" v-model="form.karakteristik" id="karakteristik" rows="3" class="w-full" :invalid="!!form.errors.karakteristik" />
+                        <InputText
+                            disabled
+                            v-model="form.karakteristik"
+                            id="karakteristik"
+                            class="w-full"
+                            :invalid="!!form.errors.karakteristik"
+                        />
                         <Message variant="simple" size="small" v-if="form.errors.karakteristik" severity="error">{{
                             form.errors.karakteristik
                         }}</Message>

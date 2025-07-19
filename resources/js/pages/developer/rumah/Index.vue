@@ -46,6 +46,11 @@ function confirmDelete(id: number) {
     });
 }
 
+function formatRupiah(angka: number | string): string {
+    const number = typeof angka === 'string' ? parseInt(angka) : angka;
+    return number.toLocaleString('id-ID');
+}
+
 function doDestroy(id: number) {
     router.delete(route('developer.rumah.destroy', id), {
         onSuccess: () => {
@@ -53,7 +58,7 @@ function doDestroy(id: number) {
             if (message) {
                 toast.success(message, { position: 'top-right' });
             }
-            router.reload();
+            router.visit(route('developer.rumah.index'));
         },
         onError: () => {
             const message = page.props.flash?.error ?? 'Gagal menghapus data.';
@@ -143,7 +148,11 @@ watch(
                     <Column style="min-width: 200px" field="tipe" header="Tipe" />
                     <Column style="min-width: 200px" field="luas_bangunan" header="Luas Bangunan (m²)" />
                     <Column style="min-width: 200px" field="luas_tanah" header="Luas Tanah (m²)" />
-                    <Column style="min-width: 200px" field="harga" header="Harga (Rp)" />
+                    <Column style="min-width: 200px" field="harga" header="Harga (Rp)">
+                        <template #body="{ data }">
+                            {{ formatRupiah(data.harga) }}
+                        </template>
+                    </Column>
                     <Column style="min-width: 200px" field="karakteristik" header="Karakteristik" />
 
                     <Column frozen align-frozen="right">
